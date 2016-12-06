@@ -8,5 +8,5 @@ script:
   - chmod +x upload_service_test.py
   - ./upload_service_test.py
   - ./upload_service_test.py --req=POST
-  - ./upload_service_test.py --req=POST --file='test'
-  - ./upload_service_test.py --req=POST --file='test.jpg'
+  - ./upload_service_test.py --req=POST --files='test'
+  - ./upload_service_test.py --req=POST --files='test.jpg'
