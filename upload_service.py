@@ -1,6 +1,6 @@
 import os
 from flask import Flask, request, redirect, url_for, flash
-from worker_test import thumb_picture
+from thumbing_worker import thumb_picture
 from werkzeug import secure_filename
 
 UPLOAD_FOLDER = os.path.dirname(os.path.realpath(__file__))
@@ -11,7 +11,6 @@ app.secret_key = '********'
 
 
 def allowed_file(filename):
-    click.echo('Checking file')
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in ALLOW_EXTENSIONS
 
