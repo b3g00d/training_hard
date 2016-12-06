@@ -11,6 +11,7 @@ app.secret_key = '********'
 
 
 def allowed_file(filename):
+    click.echo('Checking file')
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in ALLOW_EXTENSIONS
 
