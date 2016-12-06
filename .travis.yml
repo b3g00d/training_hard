@@ -5,8 +5,4 @@ install:
   - pip install -r requirements.txt
 script:
   - cd test
-  - chmod +x upload_service_test.py
-  - ./upload_service_test.py
-  - ./upload_service_test.py --req=POST
-  - ./upload_service_test.py --req=POST --files='test'
-  - ./upload_service_test.py --req=POST --files='test.jpg'
+  - ./service_test.py
