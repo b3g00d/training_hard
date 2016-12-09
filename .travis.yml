@@ -3,9 +3,5 @@ python:
   - "3.5"
 install:
   - pip install -r requirements.txt
-before_script:
-  - python3 my_db.py db init
-  - python3 my_db.py db migrate
-  - python3 init_db.py
 script:
   - python3 test/service_test.py
