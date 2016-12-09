@@ -19,6 +19,7 @@ def allowed_file(filename):
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
+
     if request.method == 'POST':
         identify = request.form.get('id', None)
         if 'file' not in request.files or not identify:
@@ -28,8 +29,8 @@ def upload_file():
         if file.filename == '':
             return "File empty", 404
 
-        if User.query.filter_by(username=identify).first() is None:
-            return redirect(request.url)
+        if not User.query.filter_by(username=identify).first():
+            return "Wrong user", 404
 
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -110,9 +111,12 @@ def rename_pic():
             except:
                 return 'File in folder not found'
             pic.path = path
-
-        db.session.commit()
-        return 'Done!!!'
+        try:
+            db.session.commit()
+            return 'Done!!!'
+        except:
+            db.session.rollback()
+            return 'Error db locked'
 
 
 @app.route('/images/delete', methods=['PUT'])
@@ -133,14 +137,17 @@ def detele_pic():
             return 'No pics with that name'
 
         for pic in pics:
+            db.session.delete(pic)
             try:
                 os.remove(pic.path)
             except:
                 return 'File in folder not found'
-            db.session.delete(pic)
-
-        db.session.commit()
-        return 'Done!!!'
+        try:
+            db.session.commit()
+            return 'Done!!!'
+        except:
+            db.session.rollback()
+            return 'Error db locked'
 
 
 @app.route('/images/select', methods=['GET'])
