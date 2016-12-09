@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 tmp/test.db
+migrations/*
 static/*
 # C extensions
 *.so
