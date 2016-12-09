@@ -2,10 +2,8 @@
 import json
 import unittest
 import shutil
-import io
 import tempfile
-# import os
-
+import io
 
 try:
     from ..upload_service import app
@@ -14,17 +12,19 @@ except:
     from os import sys, path
     sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
     from upload_service import app
+    import thumbing_worker
     from my_db import db, User, Album
 
 
 class FlaskrTestCase(unittest.TestCase):
 
     def setUp(self):
+        thumbing_worker.app.conf.update(CELERY_ALWAYS_EAGER=True)
         self.test_dir = tempfile.mkdtemp()
         self.app = app
         self.app.config['TESTING'] = True
-        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'  # + \
-        #  os.path.dirname(os.path.abspath(__file__)) + '/db/test.db'
+        # self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://' + \
+        #     os.path.dirname(os.path.abspath(__file__)) + '/db/test.db'
 
         self.db = db
         self.db.create_all()
@@ -52,24 +52,29 @@ class FlaskrTestCase(unittest.TestCase):
         self.db.session.remove()
         self.db.drop_all()
 
-    # def test_Upload(self):
-    #     client = self.app.test_client()
-    #     resp1 = client.post('/')
-    #     resp2 = client.post('/',
-    #                         data=dict(
-    #                             file=(None, ''), id='test'
-    #                         ),
-    #                         content_type="multipart/form-data")
-    #     resp3 = client.post(
-    #         '/',
-    #         data=dict(
-    #             file=(io.BytesIO(b'test'),
-    #                   'test.jpg'), id='test'
-    #         ),
-    #         content_type="multipart/form-data")
-    #     assert '400' in str(resp1.status)
-    #     assert '404' in str(resp2.status)
-    #     assert '302' in str(resp3.status)
+    def test_Upload(self):
+        client = self.app.test_client()
+        resp1 = client.post('/')
+        resp2 = client.post(
+            '/',
+            data=dict(
+                file=(None, ''),
+                id='test'
+            ),
+            content_type="multipart/form-data"
+        )
+
+        resp3 = client.post(
+            '/',
+            data=dict(
+                file=(io.BytesIO(b'test data'), 'test.jpg'),
+                id='test'
+            ),
+            content_type="multipart/form-data"
+        )
+        assert '400' in str(resp1.status)
+        assert '404' in str(resp2.status)
+        assert '302' in str(resp3.status)
 
     def test_create_user(self):
         assert self.User.query.count() == 1
