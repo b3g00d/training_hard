@@ -2,9 +2,11 @@
 __pycache__/
 *.py[cod]
 *$py.class
-tmp/test.db
+tmp/*
+!tmp/.gitkeep
 migrations/*
 static/*
+!static/.gitkeep
 # C extensions
 *.so
 
