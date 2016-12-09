@@ -47,5 +47,7 @@ class Album(db.Model):
         command = [Album.path.contains(name), Album.user_id == user.id]
         return Album.query.filter(reduce(lambda x, y: (x) & (y), command))
 
+
 if __name__ == '__main__':
+    db.create_all()
     manager.run()
