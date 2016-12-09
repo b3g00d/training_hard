@@ -3,6 +3,10 @@ python:
   - "3.5"
 install:
   - pip install -r requirements.txt
+before_script:
+  - python3 my_db.py db init
+  - python3 my_db.py db migrate
+  - python3 my_db.py db upgrade
 script:
   - cd test
   - chmod +x service_test.py
