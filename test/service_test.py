@@ -4,6 +4,7 @@ import unittest
 import shutil
 import io
 import tempfile
+import os
 
 
 try:
@@ -22,6 +23,9 @@ class FlaskrTestCase(unittest.TestCase):
         self.test_dir = tempfile.mkdtemp()
         self.app = app
         self.app.config['TESTING'] = True
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + \
+            os.path.dirname(os.path.abspath(__file__)) + '/db/test.db'
+
         self.db = db
         self.db.create_all()
         self.final_path = path.join(self.test_dir, 'pic.jpg')
