@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
+import json
 import unittest
 import shutil
 import io
 import tempfile
-from flask import request
+
 
 try:
     from ..upload_service import app
@@ -23,7 +24,9 @@ class FlaskrTestCase(unittest.TestCase):
         self.app.config['TESTING'] = True
         self.db = db
         self.db.create_all()
-        with open(path.join(self.test_dir, 'pic.jpg'), 'w') as f:
+        self.final_path = path.join(self.test_dir, 'pic.jpg')
+        with open(self.final_path, 'w') as f:
+            f.write('test')
 
         self.User = User
         self.user = self.User(
@@ -32,7 +35,7 @@ class FlaskrTestCase(unittest.TestCase):
         )
         self.Album = Album
         self.pic = self.Album(
-            path='/home/begood/pic.jpg',
+            path=self.final_path,
             user=self.user
         )
         self.db.session.add(self.user)
@@ -91,8 +94,7 @@ class FlaskrTestCase(unittest.TestCase):
     def test_get_pic(self):
         assert self.Album.query.count() == 1
         pic = self.Album.query.first()
-        print(pic.path)
-        assert pic.path == '/home/begood/pic.jpg'
+        assert pic.path == self.final_path
 
     def test_delete_pic(self):
         assert self.Album.query.count() == 1
@@ -104,13 +106,29 @@ class FlaskrTestCase(unittest.TestCase):
         client = self.app.test_client()
         api_images = client.get('/images')
         assert '200' in api_images.status
-        api_rename = client.put('/images/rename', content_type='application/json',
-                                data={
+        api_rename = client.put('/images/rename',
+                                content_type='application/json',
+                                data=json.dumps({
                                     'name': 'pic',
                                     'rename': 'repic',
                                     'user': 'test'
-                                })
-        print(api_rename)
+                                }))
+        assert '200' in api_rename.status
+        api_select = client.get('/images/select',
+                                content_type='application/json',
+                                data=json.dumps({
+                                    'name': 'repic',
+                                    'user': 'test'
+                                }))
+        assert '200' in api_select.status
+
+        api_detele = client.put('/images/delete',
+                                content_type='application/json',
+                                data=json.dumps({
+                                    'name': 'repic',
+                                    'user': 'test'
+                                }))
+        assert '200' in api_detele.status
 
 if __name__ == '__main__':
     unittest.main()
