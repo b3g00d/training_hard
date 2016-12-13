@@ -1,3 +1,4 @@
+![alt tag](https://travis-ci.org/mr2uang/training_hard.svg?branch=master)
 Upload Service
 ==============
 Upload/Select/List/Rename/Delete picture voi username
@@ -83,3 +84,8 @@ Test Upload service:
 
 - cd test
 - python3 service_test.py
+
+Run RAML:
+---------
+
+
