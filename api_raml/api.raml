@@ -1,0 +1,113 @@
+#%RAML 0.8
+---
+title: Worl wide
+version: v1
+baseUri: http://localhost:5000
+/images:
+  description: get toan bo images
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              {
+                "result": {
+                  "anarchy.jpg": {
+                  "name": "anarchy",
+                  "path": "/home/begood/Work_flask/training_hard/static/asset/admin/anarchy.jpg",
+                  "size": 769961
+                  }
+                }
+              }
+  
+  /select:
+    description: chon images voi user
+    get:
+      queryParameters:
+        name:
+          description: " Viet ten"
+          required: true
+          type: string
+          example: "arnarchy.jpg"
+        user: 
+          description: " Viet user"
+          required: true
+          type: string
+          example: "admin"
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                *
+  /rename:
+    description: doi ten anh
+    put:
+      body:
+        application/json:
+          schema: |
+            {
+              "type": "object",
+              "$schema": "http://json-schema.org/draft-03/schema",
+              "id": "http://jsonschema.net",
+              "required": true,
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                
+                "user": {
+                  "type": "string",
+                  "required": true,
+                }
+              }
+            }
+          example: |
+            {
+              "name": "anarchy",
+              "rename": "hello",
+              "user": "admin"
+            }
+          
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                *
+  /delete:
+    description: Xoa anh
+    put:
+      body:
+        application/json:
+          schema: |
+            {
+              "type": "object",
+              "$schema": "http://json-schema.org/draft-03/schema",
+              "id": "http://jsonschema.net",
+              "required": true,
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "user": {
+                  "type": "string",
+                  "required": true,
+                }
+              }
+            }
+          example: |
+            {
+              "name": "anarchy",
+              "user": "admin"
+            }
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                *    
+          
