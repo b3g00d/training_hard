@@ -3,6 +3,7 @@ from flask import Flask, request, redirect, url_for, jsonify
 from thumbing_worker import thumb_picture
 from werkzeug import secure_filename
 from my_db import User, Album, db
+from flask_cors import CORS
 
 ASSET = '/static/asset/'
 UPLOAD_FOLDER = os.path.dirname(os.path.realpath(__file__)) + ASSET
@@ -10,6 +11,7 @@ ALLOW_EXTENSIONS = set(['jpg'])
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.secret_key = '********'
+CORS(app)
 
 
 def allowed_file(filename):
@@ -72,17 +74,23 @@ def rename(file, name):
 @app.route('/images', methods=['GET'])
 def api():
     if request.method == 'GET':
-        pictures = Album.query.all()
-        images = dict()
-        for pic in pictures:
-            full_name, real_name = get_name(pic)
-            size = get_length(pic)
-            images[full_name] = {
-                'name': real_name,
-                'path': pic.path,
-                'size': size
-            }
-        return jsonify(result=images)
+        try:
+            pictures = Album.query.all()
+            if pictures:
+                images = dict()
+                for pic in pictures:
+                    full_name, real_name = get_name(pic)
+                    size = get_length(pic)
+                    images[full_name] = {
+                        'name': real_name,
+                        'path': pic.path,
+                        'size': size
+                    }
+            else:
+                images = {}
+            return jsonify(result=images)
+        except:
+            return jsonify(result={})
 
 
 @app.route('/images/rename', methods=['PUT'])
@@ -153,9 +161,8 @@ def detele_pic():
 @app.route('/images/select', methods=['GET'])
 def select_pic():
     if request.method == 'GET':
-        data = request.get_json()
-        name = data.get('name', '')
-        in_user = data.get('user', '')
+        name = request.args.get('name', '')
+        in_user = request.args.get('user', '')
         if not name or not in_user:
             return ' wrong name or user'
 
