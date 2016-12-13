@@ -124,7 +124,6 @@ class FlaskrTestCase(unittest.TestCase):
                                 }))
         assert '200' in api_rename.status
         api_select = client.get('/images/select',
-                                content_type='application/json',
                                 data=json.dumps({
                                     'name': 'repic',
                                     'user': 'test'
