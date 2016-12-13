@@ -38,13 +38,12 @@ curl -X GET -G 'http://localhost:5000/select' -d 'user=admin' -d 'name=name'
 Response success:
 ```json
 {
-	{"name":
-		{
-			"path": "path"
-			"size": "size"
+	"name":{
+			"path": "path",
+			"size": "size",
 			"fullname": "fullname"
 		}
-	}
+	
 }
 ```
 
