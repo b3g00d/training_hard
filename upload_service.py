@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 import os
+from hashlib import sha256
 from flask import Flask, request, redirect, url_for, jsonify
 from thumbing_worker import thumb_picture
 from werkzeug import secure_filename
-from my_db import User, Album, db
+from my_db import User, Album, db, Token
 from flask_cors import CORS
 
 ASSET = '/static/asset/'
@@ -19,38 +21,50 @@ def allowed_file(filename):
         filename.rsplit('.', 1)[1] in ALLOW_EXTENSIONS
 
 
+def get_user_from_token(value):
+    result = -1
+    token = Token.query.filter_by(token_value=value).first()
+    if token:
+        user = User.query.filter_by(id=token.user_id).first()
+        if token.token_value == Token.get_token_with_time(user):
+            result = user
+    if result == -1:
+        return None
+    return user
+
+
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
 
     if request.method == 'POST':
-        identify = request.form.get('id', None)
+        identify = request.form.get('token', None)
         if 'file' not in request.files or not identify:
             return "Bad request", 400
 
         file = request.files['file']
         if file.filename == '':
             return "File empty", 404
+        user = get_user_from_token(identify)
 
-        if not User.query.filter_by(username=identify).first():
-            return "Wrong user", 404
-
-        if file and allowed_file(file.filename):
+        if user and file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            path = os.path.join(app.config['UPLOAD_FOLDER'], identify)
+            path = os.path.join(app.config['UPLOAD_FOLDER'], user.username)
             if not os.path.exists(path):
                 os.makedirs(path)
             in_file = os.path.join(path, filename)
             file.save(in_file)
-            thumb_picture.delay(in_file, identify)
+            thumb_picture.delay(in_file, user.username)
             return redirect(url_for('upload_file',
                                     filename=file.filename))
+
+        return "Failed"
 
     return '''
     <!doctype html>
     <title>Upload file</title>
     <hl>Upload file</hl>
     <form action="" method=post enctype=multipart/form-data>
-      <p><input type=id name=id>
+      <p><input type=token name=token>
          <input type=file name=file>
          <input type=submit value=Upload>
     </form>
@@ -99,11 +113,11 @@ def rename_pic():
         data = request.get_json()
         name = data.get('name', '')
         re_name = data.get('rename', '')
-        in_user = data.get('user', '')
-        if not name or not in_user or not re_name:
+        token = data.get('token', '')
+        if not name or not token or not re_name:
             return 'wrong name or user'
 
-        user = User.query.filter_by(username=in_user).first()
+        user = get_user_from_token(token)
         if not user:
             return 'No user in table'
 
@@ -132,11 +146,11 @@ def detele_pic():
     if request.method == 'PUT':
         data = request.get_json()
         name = data.get('name', '')
-        in_user = data.get('user', '')
-        if not name or not in_user:
+        token = data.get('token', '')
+        if not name or not token:
             return 'wrong name or user'
 
-        user = User.query.filter_by(username=in_user).first()
+        user = get_user_from_token(token)
         if not user:
             return 'No user in table'
 
@@ -162,11 +176,11 @@ def detele_pic():
 def select_pic():
     if request.method == 'GET':
         name = request.args.get('name', '')
-        in_user = request.args.get('user', '')
-        if not name or not in_user:
+        token = request.args.get('token', '')
+        if not name or not token:
             return ' wrong name or user'
 
-        user = User.query.filter_by(username=in_user).first()
+        user = get_user_from_token(token)
         if not user:
             return 'No user in table'
 
@@ -182,6 +196,62 @@ def select_pic():
                 'size': size
             }
         })
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    result = 0
+    if request.method == 'POST':
+        data = request.get_json()
+        username = data.get('username', '')
+        password = data.get('password', '')
+        if not username or not password:
+            result = -1
+        else:
+            user = User.filter(username, password)
+            if not user:
+                result = -1
+            elif user.password == sha256(password).hexdigest():
+                result = Token.get_token(user)
+            else:
+                result = -1
+        if result == -1:
+            result = "Result not found"
+        return jsonify(token=result)
+
+
+@app.route('/reg', methods=['POST'])
+def reg():
+    result = 0
+    if request.method == 'POST':
+        data = request.get_json()
+        username = data.get('username', '')
+        password = data.get('password', '')
+        repass = data.get('repassword', '')
+        email = data.get('email', '')
+        if not username or not email or not password or not (
+                password == repass):
+            result = -1
+        else:
+            user = User.query.filter_by(username=username, email=email).first()
+            if not user:
+                user = User(username, email, password)
+                db.session.add(user)
+                try:
+                    db.session.commit()
+                    token = Token(user)
+                    db.session.add(token)
+                    db.session.commit()
+                    result = token.token_value
+                except:
+                    db.session.rollback()
+                    result = -1
+            else:
+                result = -1
+        if result == -1:
+            return "Failed"
+        return jsonify(token=result)
+
 
 if __name__ == '__main__':
     app.run()
