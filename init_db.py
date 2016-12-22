@@ -1,7 +1,9 @@
-#!/usr/bin/env python3
-from my_db import db, User, Album
+#!/usr/bin/env python2
+from my_db import db, User, Token
 
 if __name__ == '__main__':
     db.create_all()
-    db.session.add(User('admin', 'admin@gmail.com'))
+    user = User('admin', 'admin@gmail.com', 'adminpass')
+    db.session.add(user)
+    db.session.add(Token(user))
     db.session.commit()
