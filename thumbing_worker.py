@@ -12,7 +12,10 @@ NAME_32_32 = '.thumbnail32'
 NAME_64_64 = '.thumbnail64'
 NAMES = [NAME_16_16, NAME_32_32, NAME_64_64]
 UPLOAD_FOLDER = os.path.dirname(os.path.realpath(__file__))
-app = Celery('thumbing_worker', broker='amqp://guest@localhost:5672//')
+CELERY_BROKER_URL = os.environ.get(
+    'CELERY_BROKER_URL',
+    'amqp://guest@localhost:5672//')
+app = Celery('thumbing_worker', broker=CELERY_BROKER_URL)
 
 
 @app.task
