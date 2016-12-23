@@ -1,0 +1,12 @@
+version: '2'
+services:
+  mysql:
+    build: .
+
+  ubuntu:
+    build: ubuntu/
+    links:
+      - mysql:mysql
+    depends_on:
+      - mysql
+
