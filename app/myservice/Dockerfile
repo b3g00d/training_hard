@@ -9,7 +9,10 @@ WORKDIR /mydb
 RUN pip install -r requirements.txt
 RUN chmod +x init_db.py
 COPY ./myservice /myservice/
-WORKDIR /myservice
+RUN chown -R myapp:myapp /myservice
+RUN chown -R myapp:myapp /home
 USER myapp
+RUN mkdir /home/myapp && mkdir /home/myapp/myservice && mkdir /home/myapp/myservice/asset
 EXPOSE 5000
+WORKDIR /myservice
 CMD python2 upload_service.py
