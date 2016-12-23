@@ -9,8 +9,7 @@ docker-compose.yml file in app directory
 
 [!] If this last command keep getting error, because mysql didn't ready yet. Wait and run again!
 
-- browse http://localhost:5000
-
+- browse [this url](http://localhost:5000)
 Upload Service
 --------------
 Upload/Select/List/Rename/Delete picture voi username
