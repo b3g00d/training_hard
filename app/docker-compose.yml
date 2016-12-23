@@ -1,0 +1,27 @@
+version: '2'
+services:
+  mydb:
+    build: 
+      context: .
+      dockerfile: ./mydb/Dockerfile
+
+  myservice:
+    build: 
+      context: .
+      dockerfile: ./myservice/Dockerfile
+    ports:
+      - "5000:5000"
+    restart: always
+    depends_on:
+      - mydb
+  
+  mycelery:
+    build:
+      context: .
+      dockerfile: ./myworker/Dockerfile
+    depends_on:
+      - mydb
+      - amqp
+
+  amqp:
+    image: rabbitmq:latest 
