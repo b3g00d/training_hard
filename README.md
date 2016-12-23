@@ -1,6 +1,18 @@
 ![alt tag](https://travis-ci.org/mr2uang/training_hard.svg?branch=master)
+Docker
+======
+
+docker-compose.yml file in app directory
+- docker-compose build
+- docker-compose run -d
+- docker exec "myservice_name" python2 init_db.py
+
+[!] If this last command keep getting error, because mysql didn't ready yet. Wait and run again!
+
+- browse http://localhost:5000
+
 Upload Service
-==============
+--------------
 Upload/Select/List/Rename/Delete picture voi username
 
 - Thiet ke voi Flask va RAML
