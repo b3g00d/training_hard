@@ -10,4 +10,5 @@ RUN chmod +x init_db.py
 COPY ./myservice /myservice/
 WORKDIR /myservice
 USER myapp
+EXPOSE 5000
 CMD python2 upload_service.py
